@@ -15,24 +15,24 @@ function main()
 %       - Bad Apple (purple): Eat to shrink (game over if too short)
 %       - Bad apples disappear and reappear randomly
 %       - Adjustable game speed
+%       - Session high score tracking
+%       - Instructions window
 
-clc;
-clear;
-close all;
+    %% Initialize game components
+    gameState = game.GameState();
+    renderer = graphics.Renderer();
+    instructionsWindow = graphics.InstructionsWindow();
+    gameTimer = [];
 
-%% Initialize game components
-gameState = game.GameState();
-renderer = graphics.Renderer();
-gameTimer = [];
-
-%% Start game
-startGame();
+    %% Start game
+    startGame();
 
 %% ==================== HELPER FUNCTIONS ====================
 
     function startGame()
         % Initialize and start the game
-        renderer.createWindow(@keyPressCallback, @closeGame);
+        renderer.createWindow(@keyPressCallback, @closeGame, @togglePause);
+        instructionsWindow.show();
         createTimer();
         renderer.render(gameState);
         start(gameTimer);
@@ -99,7 +99,7 @@ startGame();
             stop(gameTimer);
         end
         renderer.render(gameState);
-        renderer.showGameOverOverlay(gameState.GameOverMessage, gameState.Score);
+        renderer.showGameOverOverlay(gameState.GameOverMessage, gameState.Score, gameState.HighScore);
     end
 
     function keyPressCallback(~, event)
@@ -165,6 +165,7 @@ startGame();
             end
         end
         
+        renderer.updatePauseButton(gameState.IsPaused);
         renderer.updateTitle(gameState);
     end
 
@@ -189,6 +190,7 @@ startGame();
         end
         
         renderer.close();
+        instructionsWindow.close();
     end
 
     function timerError(~, event)

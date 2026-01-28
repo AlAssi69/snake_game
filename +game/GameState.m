@@ -7,6 +7,7 @@ classdef GameState < handle
         GoodApple           % [x, y] position of good apple
         BadApple            % [x, y] position of bad apple (empty if hidden)
         Score               % Current score
+        HighScore           % Highest score this session
         SpeedFactor         % Current speed factor (1.0 = normal)
         IsPaused            % Whether game is paused
         IsGameOver          % Whether game has ended
@@ -33,6 +34,7 @@ classdef GameState < handle
         function obj = GameState()
             %GAMESTATE Constructor
             obj.Snake = game.Snake();
+            obj.HighScore = 0;
             obj.reset();
         end
         
@@ -40,6 +42,7 @@ classdef GameState < handle
             %RESET Reset game to initial state
             obj.Snake.reset();
             obj.Score = 0;
+            % Note: HighScore is NOT reset - it persists across games
             obj.SpeedFactor = utils.Config.DefaultSpeedFactor;
             obj.IsPaused = false;
             obj.IsGameOver = false;
@@ -136,6 +139,11 @@ classdef GameState < handle
             %HANDLEGOODAPPLE Handle eating a good apple
             obj.Snake.moveAndGrow();
             obj.Score = obj.Score + 1;
+            
+            % Update high score if needed
+            if obj.Score > obj.HighScore
+                obj.HighScore = obj.Score;
+            end
             
             % Respawn good apple
             excludePositions = obj.BadApple;

@@ -10,8 +10,10 @@ classdef Renderer < handle
         BadAppleHandle      % Handle for bad apple
         PauseTextHandle     % Handle for pause overlay
         GameOverTextHandle  % Handle for game over overlay
+        PauseButton         % Handle for pause button
         GridSize            % Size of the grid
         CellSize            % Size of each cell in pixels
+        PauseCallback       % Callback function for pause button
     end
     
     methods
@@ -22,10 +24,17 @@ classdef Renderer < handle
             obj.SnakeHandles = [];
         end
         
-        function createWindow(obj, keyPressCallback, closeCallback)
+        function createWindow(obj, keyPressCallback, closeCallback, pauseCallback)
             %CREATEWINDOW Create the game window
+            %   pauseCallback is optional - function to call when pause button is clicked
+            
+            obj.PauseCallback = [];
+            if nargin >= 4
+                obj.PauseCallback = pauseCallback;
+            end
+            
             figWidth = obj.GridSize * obj.CellSize + 50;
-            figHeight = obj.GridSize * obj.CellSize + 50;
+            figHeight = obj.GridSize * obj.CellSize + 90;  % Extra space for button
             
             obj.Figure = figure(...
                 'Name', 'Snake Game - Score: 0', ...
@@ -38,7 +47,18 @@ classdef Renderer < handle
                 'KeyPressFcn', keyPressCallback, ...
                 'CloseRequestFcn', closeCallback);
             
-            % Create axes
+            % Create pause button at top
+            obj.PauseButton = uicontrol(obj.Figure, ...
+                'Style', 'pushbutton', ...
+                'String', 'Pause', ...
+                'Units', 'pixels', ...
+                'Position', [25, figHeight - 35, 80, 28], ...
+                'FontSize', 10, ...
+                'FontWeight', 'bold', ...
+                'BackgroundColor', [0.9, 0.9, 0.9], ...
+                'Callback', @obj.onPauseButtonClick);
+            
+            % Create axes (shifted down to make room for button)
             obj.Axes = axes(obj.Figure, ...
                 'Units', 'pixels', ...
                 'Position', [25, 25, obj.GridSize * obj.CellSize, obj.GridSize * obj.CellSize], ...
@@ -55,6 +75,28 @@ classdef Renderer < handle
             
             % Draw grid
             obj.drawGrid();
+        end
+        
+        function onPauseButtonClick(obj, ~, ~)
+            %ONPAUSEBUTTONCLICK Handle pause button click
+            if ~isempty(obj.PauseCallback)
+                obj.PauseCallback();
+            end
+            % Return focus to figure for keyboard input
+            figure(obj.Figure);
+        end
+        
+        function updatePauseButton(obj, isPaused)
+            %UPDATEPAUSEBUTTON Update pause button text
+            if ~isempty(obj.PauseButton) && isvalid(obj.PauseButton)
+                if isPaused
+                    obj.PauseButton.String = 'Resume';
+                    obj.PauseButton.BackgroundColor = [0.8, 1.0, 0.8];
+                else
+                    obj.PauseButton.String = 'Pause';
+                    obj.PauseButton.BackgroundColor = [0.9, 0.9, 0.9];
+                end
+            end
         end
         
         function drawGrid(obj)
@@ -180,15 +222,28 @@ classdef Renderer < handle
             end
         end
         
-        function showGameOverOverlay(obj, message, score)
+        function showGameOverOverlay(obj, message, score, highScore)
             %SHOWGAMEOVEROVERLAY Show game over text
+            %   highScore is optional - if provided, shows high score too
             if ~isempty(obj.GameOverTextHandle) && isvalid(obj.GameOverTextHandle)
                 delete(obj.GameOverTextHandle);
             end
             
+            if nargin >= 4 && highScore > 0
+                if score >= highScore
+                    textLines = {message, sprintf('Final Score: %d', score), ...
+                                 'NEW HIGH SCORE!', '', 'Press R to Restart'};
+                else
+                    textLines = {message, sprintf('Final Score: %d', score), ...
+                                 sprintf('High Score: %d', highScore), '', 'Press R to Restart'};
+                end
+            else
+                textLines = {message, sprintf('Final Score: %d', score), '', 'Press R to Restart'};
+            end
+            
             obj.GameOverTextHandle = text(obj.Axes, ...
                 obj.GridSize/2, obj.GridSize/2, ...
-                {message, sprintf('Final Score: %d', score), '', 'Press R to Restart'}, ...
+                textLines, ...
                 'HorizontalAlignment', 'center', ...
                 'VerticalAlignment', 'middle', ...
                 'FontSize', 18, ...
@@ -213,8 +268,8 @@ classdef Renderer < handle
                 status = '';
             end
             
-            obj.Figure.Name = sprintf('Snake Game - Score: %d | Speed: %d%% %s', ...
-                gameState.Score, speedPercent, status);
+            obj.Figure.Name = sprintf('Snake Game - Score: %d | High: %d | Speed: %d%% %s', ...
+                gameState.Score, gameState.HighScore, speedPercent, status);
         end
         
         function clearOverlays(obj)
