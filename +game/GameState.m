@@ -54,7 +54,7 @@ classdef GameState < handle
             obj.spawnBadApple();
         end
         
-        function gridSize = get.GridSize(obj)
+        function gridSize = get.GridSize(obj) %#ok<MANU>
             %GET.GRIDSIZE Get grid size from config
             gridSize = utils.Config.GridSize;
         end
