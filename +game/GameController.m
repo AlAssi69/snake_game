@@ -24,7 +24,14 @@ classdef GameController < handle
                 @obj.onKeyPress, ...
                 @obj.onClose, ...
                 @obj.togglePause);
+            
+            % Show instructions window and wait for it to close
             obj.InstructionsWindow.show();
+            if obj.InstructionsWindow.isValid()
+                uiwait(obj.InstructionsWindow.getFigure());
+            end
+            
+            % Start the game after instructions window is closed
             obj.createTimer();
             obj.Renderer.render(obj.GameState);
             start(obj.GameTimer);
