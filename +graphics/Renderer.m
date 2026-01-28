@@ -232,10 +232,10 @@ classdef Renderer < handle
             if nargin >= 4 && highScore > 0
                 if score >= highScore
                     textLines = {message, sprintf('Final Score: %d', score), ...
-                                 'NEW HIGH SCORE!', '', 'Press R to Restart'};
+                        'NEW HIGH SCORE!', '', 'Press R to Restart'};
                 else
                     textLines = {message, sprintf('Final Score: %d', score), ...
-                                 sprintf('High Score: %d', highScore), '', 'Press R to Restart'};
+                        sprintf('High Score: %d', highScore), '', 'Press R to Restart'};
                 end
             else
                 textLines = {message, sprintf('Final Score: %d', score), '', 'Press R to Restart'};
