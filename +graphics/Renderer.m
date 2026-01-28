@@ -11,6 +11,7 @@ classdef Renderer < handle
         PauseTextHandle     % Handle for pause overlay
         GameOverTextHandle  % Handle for game over overlay
         PauseButton         % Handle for pause button
+        HighScoreLabel      % Handle for high score label
         GridSize            % Size of the grid
         CellSize            % Size of each cell in pixels
         PauseCallback       % Callback function for pause button
@@ -57,6 +58,18 @@ classdef Renderer < handle
                 'FontWeight', 'bold', ...
                 'BackgroundColor', [0.9, 0.9, 0.9], ...
                 'Callback', @obj.onPauseButtonClick);
+            
+            % Create high score label next to pause button
+            obj.HighScoreLabel = uicontrol(obj.Figure, ...
+                'Style', 'text', ...
+                'String', 'High Score: 0', ...
+                'Units', 'pixels', ...
+                'Position', [115, figHeight - 35, 150, 28], ...
+                'FontSize', 10, ...
+                'FontWeight', 'bold', ...
+                'HorizontalAlignment', 'left', ...
+                'BackgroundColor', graphics.Colors.Background, ...
+                'ForegroundColor', [0.0, 0.0, 0.0]);
             
             % Create axes (shifted down to make room for button)
             obj.Axes = axes(obj.Figure, ...
@@ -229,16 +242,19 @@ classdef Renderer < handle
                 delete(obj.GameOverTextHandle);
             end
             
-            if nargin >= 4 && highScore > 0
-                if score >= highScore
-                    textLines = {message, sprintf('Final Score: %d', score), ...
-                        'NEW HIGH SCORE!', '', 'Press R to Restart'};
-                else
-                    textLines = {message, sprintf('Final Score: %d', score), ...
-                        sprintf('High Score: %d', highScore), '', 'Press R to Restart'};
-                end
+            % Always show high score if provided, otherwise show 0
+            if nargin >= 4
+                displayHighScore = highScore;
             else
-                textLines = {message, sprintf('Final Score: %d', score), '', 'Press R to Restart'};
+                displayHighScore = 0;
+            end
+            
+            if score >= displayHighScore && displayHighScore > 0
+                textLines = {message, sprintf('Final Score: %d', score), ...
+                    'NEW HIGH SCORE!', '', 'Press R to Restart'};
+            else
+                textLines = {message, sprintf('Final Score: %d', score), ...
+                    sprintf('High Score: %d', displayHighScore), '', 'Press R to Restart'};
             end
             
             obj.GameOverTextHandle = text(obj.Axes, ...
@@ -253,7 +269,7 @@ classdef Renderer < handle
         end
         
         function updateTitle(obj, gameState)
-            %UPDATETITLE Update figure title
+            %UPDATETITLE Update figure title and high score label
             if ~obj.isValid()
                 return;
             end
@@ -270,6 +286,11 @@ classdef Renderer < handle
             
             obj.Figure.Name = sprintf('Snake Game - Score: %d | High: %d | Speed: %d%% %s', ...
                 gameState.Score, gameState.HighScore, speedPercent, status);
+            
+            % Update high score label next to pause button
+            if ~isempty(obj.HighScoreLabel) && isvalid(obj.HighScoreLabel)
+                obj.HighScoreLabel.String = sprintf('High Score: %d', gameState.HighScore);
+            end
         end
         
         function clearOverlays(obj)
