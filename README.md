@@ -9,9 +9,9 @@ A classic Snake game implementation in MATLAB with modern features including Goo
 - **Bad Apples (Purple)**: Avoid these! They shrink your snake
 - **Disappearing Bad Apples**: Bad apples disappear and reappear randomly
 - **Adjustable Speed**: Speed up or slow down the game to match your skill
-- **Session High Score**: Track your best score during the session
+- **Session High Score**: Track your best score during the session (displayed next to pause button and in game over screen)
 - **Pause Control**: Pause button and keyboard shortcut
-- **Instructions Window**: Persistent help window with controls and tips
+- **Instructions Window**: Scrollable instructions window that appears before the game starts
 
 ## Requirements
 
@@ -28,6 +28,8 @@ A classic Snake game implementation in MATLAB with modern features including Goo
 ```matlab
 >> main
 ```
+
+**Note**: When you start the game, an instructions window will appear first. Close it to begin playing.
 
 ## How to Play
 
@@ -49,7 +51,7 @@ Guide the snake to eat **red apples** to grow and score points. Avoid **purple a
 | `Esc` / `Q` | Quit game |
 | `R` | Restart (when game over) |
 
-You can also click the **Pause** button in the game window.
+You can also click the **Pause** button in the game window. The current high score is displayed next to the pause button.
 
 ### Game Elements
 
@@ -66,6 +68,11 @@ The game ends when:
 - The snake hits a wall
 - The snake collides with its own body
 - The snake shrinks to less than 2 segments (from bad apples)
+
+When the game ends, you'll see:
+- Your final score
+- The current high score (or "NEW HIGH SCORE!" if you beat it)
+- Instructions to press R to restart
 
 ### Tips
 
@@ -136,8 +143,8 @@ The game uses MATLAB's package system (`+folder` notation) to organize code into
 
 ### Graphics Package (`+graphics`)
 
-- **Renderer.m**: Handle class managing the game window, axes, and all visual elements. Uses efficient handle-based updates to prevent flickering.
-- **InstructionsWindow.m**: Separate figure window displaying game instructions.
+- **Renderer.m**: Handle class managing the game window, axes, and all visual elements. Uses efficient handle-based updates to prevent flickering. Displays high score next to pause button and in game over overlay.
+- **InstructionsWindow.m**: Separate figure window displaying scrollable game instructions. Appears before the game starts and must be closed to begin playing.
 - **Colors.m**: Constant class defining all colors used in the game.
 
 ### Utils Package (`+utils`)
