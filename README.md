@@ -83,8 +83,9 @@ Snake Game/
 ├── Docs.md                     # Original requirements specification
 │
 ├── +game/                      # Game logic package
+│   ├── GameController.m        # Main controller (timer, input, lifecycle)
+│   ├── GameState.m             # Game state (score, apples, snake state)
 │   ├── Snake.m                 # Snake entity (movement, growth)
-│   ├── GameState.m             # Overall game state management
 │   └── CollisionDetector.m     # Collision detection logic
 │
 ├── +graphics/                  # Visualization package
@@ -101,10 +102,36 @@ Snake Game/
 
 The game uses MATLAB's package system (`+folder` notation) to organize code into logical modules:
 
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         main.m                              │
+│                    (Entry Point)                            │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  GameController                             │
+│         (Timer, Input, Game Lifecycle)                      │
+└─────────┬─────────────────────┬─────────────────────────────┘
+          │                     │
+          ▼                     ▼
+┌─────────────────┐   ┌─────────────────────────────┐
+│   GameState     │   │        Renderer             │
+│ (Score, Apples) │   │   (Window, Graphics)        │
+└────────┬────────┘   └─────────────────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│     Snake       │
+│  (Segments)     │
+└─────────────────┘
+```
+
 ### Game Package (`+game`)
 
+- **GameController.m**: Main controller class that orchestrates the game. Manages the game timer, handles keyboard/button input, coordinates between GameState and Renderer, and controls game lifecycle (start, pause, restart, quit).
+- **GameState.m**: Handle class managing game data including score, high score, pause state, apple positions, and bad apple timing.
 - **Snake.m**: Handle class representing the snake entity. Manages segments, movement, growth, and direction changes.
-- **GameState.m**: Handle class managing overall game state including score, high score, pause state, and apple timing.
 - **CollisionDetector.m**: Static methods for detecting collisions with walls, self, and apples.
 
 ### Graphics Package (`+graphics`)
@@ -137,17 +164,27 @@ Game settings can be modified in `+utils/Config.m`:
 
 ### Adding New Features
 
-1. **New game mechanics**: Add to `+game/GameState.m`
-2. **Visual changes**: Modify `+graphics/Renderer.m`
-3. **New colors**: Add to `+graphics/Colors.m`
-4. **Configuration options**: Add to `+utils/Config.m`
+| Feature Type | Where to Add |
+|--------------|--------------|
+| New game mechanics | `+game/GameState.m` |
+| New input controls | `+game/GameController.m` |
+| Visual changes | `+graphics/Renderer.m` |
+| New colors | `+graphics/Colors.m` |
+| Configuration options | `+utils/Config.m` |
+
+### Class Responsibilities
+
+- **GameController**: Timer management, input handling, game flow control
+- **GameState**: Game data and rules (what happens when snake eats apple, etc.)
+- **Snake**: Snake-specific behavior (movement, growth, direction)
+- **Renderer**: All drawing and window management
 
 ### Timer-Based Game Loop
 
-The game uses MATLAB's `timer` object for the main loop:
+The game uses MATLAB's `timer` object for the main loop, managed by `GameController`:
 - Runs at a configurable fixed rate
 - Handles pause/resume by stopping/starting the timer
-- Speed changes require recreating the timer with new period
+- Speed changes update the timer period dynamically
 
 ## License
 
