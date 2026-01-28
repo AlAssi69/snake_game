@@ -77,7 +77,7 @@ classdef InstructionsWindow < handle
                 'Plan your path ahead!'
                 'Don''t get trapped by your tail.'
                 'Adjust speed to your skill level.'
-            };
+                };
             
             uicontrol(panel, ...
                 'Style', 'text', ...
